@@ -13,13 +13,13 @@
 -define(MIDNIGHT, {0,0,0}).
 -define(V, proplists:get_value).
 
--type datetime() :: tuple(Date::calendar:date(),
-                          Time::calendar:time()).
--type datetime_plist() :: list(tuple(atom(), integer())).
+-type datetime() :: {Date::calendar:date(),
+                     Time::calendar:time()}.
+-type datetime_plist() :: list({atom(), integer()}).
 -type maybe(A) :: undefined | A.
--type timestamp() :: tuple(MegaSecs::integer(),
-                           Secs::integer(),
-                           MicroSecs::integer()).
+-type timestamp() :: {MegaSecs::integer(),
+                      Secs::integer(),
+                      MicroSecs::integer() | float()}.
 
 %% API
 
@@ -62,13 +62,17 @@ format_4({_,_,Micro}=Timestamp) ->
 %%---------------
 format({_,_,_}=Timestamp) ->
     format(calendar:now_to_datetime(Timestamp));
+format({{Y,Mo,D}, {H,Mn,S}}) when is_float(S) ->
+    FmtStr = "~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~9.6.0fZ",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S]),
+    list_to_binary(IsoStr);
 format({{Y,Mo,D}, {H,Mn,S}}) ->
     FmtStr = "~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0BZ",
     IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S]),
     list_to_binary(IsoStr).
 
 -spec parse (string()) -> datetime().
-%% @doc Convert an ISO 8601 formatted string to a 
+%% @doc Convert an ISO 8601 formatted string to a
 parse(Bin) when is_binary(Bin) ->
     parse(binary_to_list(Bin));
 parse(Str) ->
@@ -190,7 +194,7 @@ decimal(Str, Acc, Key) ->
                 false
         end,
     {Parts, Rest} = lists:splitwith(F, Str),
-    acc_float([$0,$.|Parts], Rest, Key, Acc, fun offset_hour/2).    
+    acc_float([$0,$.|Parts], Rest, Key, Acc, fun offset_hour/2).
 
 offset_hour([], Acc) ->
     datetime(Acc);
@@ -239,7 +243,7 @@ datetime(_, Plist) ->
     datetime(Plist).
 
 -spec make_date (datetime_plist())
-                -> tuple(Date::calendar:date(), WeekOffsetH::non_neg_integer()).
+                -> {Date::calendar:date(), WeekOffsetH::non_neg_integer()}.
 %% @doc Return a `tuple' containing a date and, if the date is in week format,
 %% an offset in hours that can be applied to the date to adjust it to midnight
 %% of the day specified. If month format is used, the offset will be zero.
@@ -252,7 +256,7 @@ make_date(Plist) ->
                  maybe(pos_integer()),
                  maybe(pos_integer()),
                  datetime_plist())
-                -> tuple(calendar:date(), non_neg_integer()).
+                -> {calendar:date(), non_neg_integer()}.
 %% @doc Return a `tuple' containing a date and - if the date is in week format
 %% (i.e., `Month' is undefined, `Week' is not) - an offset in hours that can be
 %% applied to the date to adjust it to midnight of the day specified. If month
