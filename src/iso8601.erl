@@ -2,6 +2,9 @@
 
 -export([add_time/4,
          format/1,
+         format_2/1,
+         format_3/1,
+         format_4/1,
          parse/1]).
 
 -export_types([datetime/0,
@@ -29,6 +32,34 @@ add_time(Datetime, H, M, S) ->
 %% @doc Convert a `util:timestamp()' or a calendar-style `{date(), time()}'
 %% tuple to an ISO 8601 formatted string. Note that this function always
 %% returns a string with no offset (i.e., ending in "Z").
+
+%%---------------
+%% format_2精确到毫秒
+%%---------------
+format_2({_,_,Micro}=Timestamp) ->
+    {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_datetime(Timestamp),
+    Milli =  round(Micro/1000),
+    FmtStr = "~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0B.~3.10.0BZ",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Milli]),
+    list_to_binary(IsoStr).
+
+format_3({_,_,Micro}=Timestamp) ->
+    {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_datetime(Timestamp),
+    Milli =  round(Micro/1000),
+    FmtStr = "~4.10.0B~2.10.0B~2.10.0BT~2.10.0B~2.10.0B~2.10.0B.~3.10.0BZ",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Milli]),
+    list_to_binary(IsoStr).
+
+format_4({_,_,Micro}=Timestamp) ->
+    {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_datetime(Timestamp),
+    Milli =  round(Micro/1000),
+    FmtStr = "~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S]),
+    list_to_binary(IsoStr).
+
+%%---------------
+%% format精确到秒
+%%---------------
 format({_,_,_}=Timestamp) ->
     format(calendar:now_to_datetime(Timestamp));
 format({{Y,Mo,D}, {H,Mn,S}}) ->
