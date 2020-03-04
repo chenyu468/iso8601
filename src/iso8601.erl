@@ -3,9 +3,13 @@
 -export([add_time/4,
          format/1,
          format_2/1,
+         format_2_local/1,
          format_3/1,
          format_4/1,
          format_5/1,
+         format_6/1,
+         format_6_local/1,
+         format_7/1,
          parse/1]).
 
 -export_types([datetime/0,
@@ -44,6 +48,13 @@ format_2({_,_,Micro}=Timestamp) ->
     IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Milli]),
     list_to_binary(IsoStr).
 
+format_2_local({_,_,Micro}=Timestamp) ->
+    {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_local_time(Timestamp),
+    Milli =  round(Micro/1000),
+    FmtStr = "~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0B.~3.10.0BZ",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Milli]),
+    list_to_binary(IsoStr).
+
 format_3({_,_,Micro}=Timestamp) ->
     {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_datetime(Timestamp),
     Milli =  round(Micro/1000),
@@ -62,8 +73,21 @@ format_5({_,_,Micro}=Timestamp) ->
     {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_datetime(Timestamp),
     Milli =  round(Micro/1000),
     FmtStr = "~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0B.~6.10.0B+00.00",
-    io:format("~p",[Micro]),
     IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Micro]),
+    list_to_binary(IsoStr).
+
+format_6({_,_,Micro}=Timestamp) ->
+    {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_datetime(Timestamp),
+    Milli =  round(Micro/1000),
+    FmtStr = "~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B.~3.10.0B",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Milli]),
+    list_to_binary(IsoStr).
+
+format_6_local({_,_,Micro}=Timestamp) ->
+    {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_local_time(Timestamp),
+    Milli =  round(Micro/1000),
+    FmtStr = "~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B.~3.10.0B",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Milli]),
     list_to_binary(IsoStr).
 
 %%---------------
@@ -73,6 +97,11 @@ format({_,_,_}=Timestamp) ->
     format(calendar:now_to_datetime(Timestamp));
 format({{Y,Mo,D}, {H,Mn,S}}) ->
     FmtStr = "~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0BZ",
+    IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S]),
+    list_to_binary(IsoStr).
+
+format_7({{Y,Mo,D}, {H,Mn,S}}) ->
+    FmtStr = "~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B",
     IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S]),
     list_to_binary(IsoStr).
 
