@@ -78,8 +78,8 @@ format_5({_,_,Micro}=Timestamp) ->
 
 format_6({_,_,Micro}=Timestamp) ->
     {{Y,Mo,D}, {H,Mn,S}} = calendar:now_to_datetime(Timestamp),
-    %% Milli =  round(Micro/1000),
-    Milli =  Micro, %% round(Micro/1000),
+    Milli =  round(Micro/1000),
+    %% Milli =  Micro, %% round(Micro/1000),
     FmtStr = "~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B.~3.10.0B",
     IsoStr = io_lib:format(FmtStr, [Y, Mo, D, H, Mn, S,Milli]),
     list_to_binary(IsoStr).
